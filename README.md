@@ -1,6 +1,6 @@
 # Kiro Hackathon Project
 
-Welcome to our submission for the [Kiro Hackathon](https://kiro-hackathon.devpost.com)!
+Welcome to our submission for the [Kiro Hackathon](https://kiro.devpost.com/rules)!
 
 This project was built by a two-person team. We're exploring ideas in the cybersecurity space — stay tuned for more details as we build!
 
