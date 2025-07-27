@@ -4,7 +4,7 @@ Provides console formatting, colors, and helper functions.
 """
 
 import os
-import sys
+
 from datetime import datetime
 
 # ANSI color codes for console output

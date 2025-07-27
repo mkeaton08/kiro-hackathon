@@ -7,6 +7,7 @@ import sqlite3
 import os
 from datetime import datetime
 import hashlib
+import secrets
 
 DATABASE_FILE = "ctf_game.db"
 
@@ -87,14 +88,16 @@ def create_user(username, password, is_organizer=False):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Hash the password
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    # Generate salt and hash the password
+    salt = secrets.token_hex(16)
+    password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+    combined_hash = f"{salt}:{password_hash}"
     
     try:
         cursor.execute('''
             INSERT INTO users (username, password_hash, is_organizer)
             VALUES (?, ?, ?)
-        ''', (username, password_hash, int(is_organizer)))
+        ''', (username, combined_hash, int(is_organizer)))
         
         user_id = cursor.lastrowid
         conn.commit()
@@ -121,9 +124,18 @@ def verify_password(username, password):
     if not user:
         return None
     
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    if user['password_hash'] == password_hash:
-        return user
+    # Extract salt and hash from stored password
+    try:
+        salt, stored_hash = user['password_hash'].split(':', 1)
+        password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+        if password_hash == stored_hash:
+            return user
+    except ValueError:
+        # Handle legacy passwords without salt (backward compatibility)
+        legacy_hash = hashlib.sha256(password.encode()).hexdigest()
+        if user['password_hash'] == legacy_hash:
+            return user
+    
     return None
 
 # Challenge management functions
